@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MEDISTYK Salary Annexure Builder</title>
+  <style>
+    :root{
+      --bg: #0f172a;             /* slate-900 */
+      --panel: #111827;          /* gray-900 */
+      --panel-2:#0b1220;         /* darker */
+      --accent: #22d3ee;         /* cyan-400 */
+      --accent-2:#a78bfa;        /* violet-400 */
+      --accent-3:#34d399;        /* emerald-400 */
+      --danger: #fb7185;         /* rose-400 */
+      --text: #e5e7eb;           /* gray-200 */
+      --muted:#9ca3af;           /* gray-400 */
+      --card:#111827;
+      --grid-gap: clamp(12px, 2.4vw, 22px);
+      --radius: 18px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    html,body{height:100%;}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 700px at 10% -10%, rgba(167,139,250,.18), transparent 60%),
+                  radial-gradient(1200px 700px at 120% 10%, rgba(34,211,238,.18), transparent 60%),
+                  linear-gradient(180deg, #0b1020, #0b1020 40%, #070b18 100%);
+      color: var(--text);
+    }
+    header{
+      padding: 28px clamp(16px, 4vw, 48px);
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      background: linear-gradient(135deg, rgba(34,211,238,.18), rgba(167,139,250,.18));
+      position: sticky; top:0; z-index:5; backdrop-filter: blur(6px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    header h1{margin:0; font-size: clamp(20px, 2.6vw, 30px); letter-spacing:.3px}
+    header .sub{font-size:12px; color: var(--muted)}
+    .container{padding: clamp(16px, 4vw, 40px); max-width: 1100px; margin: 0 auto;}
+    .grid{display:grid; grid-template-columns: 1.1fr .9fr; gap: var(--grid-gap);} 
+    @media (max-width: 980px){ .grid{grid-template-columns: 1fr;} }
+    .card{
+      background: linear-gradient(180deg, var(--card), var(--panel-2));
+      border-radius: var(--radius); padding: clamp(16px, 3vw, 26px);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+    .card h2{margin:.2rem 0 1rem; font-size: clamp(18px, 2.2vw, 22px)}
+    .card h3{margin: 1.2rem 0 .6rem; font-size: 16px; color: var(--accent)}
+    label{display:block; font-size: 13px; color: var(--muted); margin-bottom:6px}
+    input, select, textarea{
+      width: 100%; padding: 12px 12px; border-radius: 12px; border:1px solid rgba(255,255,255,.08);
+      background: #0b1020; color: #f9fafb; outline: none; font-size:14px;
+    }
+    input[type="checkbox"]{width:auto; transform: scale(1.2)}
+    .row{display:grid; grid-template-columns: 1fr 1fr; gap: 12px}
+    .row-3{display:grid; grid-template-columns: repeat(3,1fr); gap: 12px}
+    .row-4{display:grid; grid-template-columns: repeat(4,1fr); gap: 12px}
+    .help{font-size:12px; color: var(--muted)}
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px;
+          border:1px dashed rgba(255,255,255,.14); font-size:12px; color:var(--muted)}
+    .btns{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+    button{
+      border: none; cursor: pointer; border-radius: 12px; padding: 11px 14px; font-weight: 600; 
+      background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #081225; 
+      box-shadow: 0 8px 20px rgba(34,211,238,.25);
+    }
+    button.alt{background: linear-gradient(135deg, #1f2937, #0b1020); color:#e5e7eb; border:1px solid rgba(255,255,255,.08)}
+    button.ghost{background: transparent; color:#cbd5e1; border:1px solid rgba(255,255,255,.18)}
+    table{width:100%; border-collapse: collapse; margin-top: 12px; font-size: 14px}
+    th, td{padding: 12px 10px; border-bottom:1px solid rgba(255,255,255,.06)}
+    th{color:#c7d2fe; text-align:left; font-weight:700; background: rgba(99,102,241,.08)}
+    tr:hover td{background: rgba(255,255,255,.03)}
+    .num{text-align:right}
+    .badge{padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700}
+    .fixed{background: rgba(52,211,153,.15); color:#10b981; border:1px solid rgba(16,185,129,.35)}
+    .variable{background: rgba(99,102,241,.18); color:#8b5cf6; border:1px solid rgba(139,92,246,.35)}
+    .summary{
+      display:grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-top: 12px
+    }
+    .summary .chip{
+      background: linear-gradient(135deg, rgba(34,211,238,.12), rgba(167,139,250,.12));
+      padding: 14px; border-radius: 14px; border:1px solid rgba(255,255,255,.08); text-align:center;
+    }
+    .summary .chip h4{margin:0; font-weight:700; letter-spacing:.3px}
+    .summary .chip p{margin:.2rem 0 0; font-size: 12px; color: var(--muted)}
+    .note{font-size: 12px; color: var(--muted); margin-top:10px}
+    .tiny{font-size: 11px; color: #94a3b8}
+    footer{padding: 28px; color:#94a3b8; text-align:center; font-size:12px}
+    .warning{color: var(--danger); font-weight:700}
+    .success{color: var(--accent-3)}
+    .toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:flex-end}
+    .kicker{font-size:12px; color:#a5b4fc}
+    .hr{height:1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.16), transparent); margin: 10px 0 16px}
+    .tag{padding: 6px 9px; border-radius: 999px; font-size: 11px; background: rgba(2,132,199,.2); color:#7dd3fc; border:1px solid rgba(125,211,252,.3)}
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Salary Annexure Builder - Karnataka</h1>
+      <div class="sub">Editable components • Auto‑formulas • Print/PDF ready • Indian number formatting</div>
+    </div>
+    <div class="toolbar">
+      <button id="printBtn" title="Print / Save as PDF">🖨️ Print / PDF</button>
+      <button id="saveBtn" class="ghost" title="Save to browser">💾 Save</button>
+      <button id="loadBtn" class="ghost" title="Load from browser">📂 Load</button>
+      <button id="resetBtn" class="alt" title="Reset">♻️ Reset</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="grid">
+      <!-- Left column: Inputs -->
+      <section class="card">
+        <h2>Company & Employee</h2>
+        <div class="row">
+          <div>
+            <label>Company Name</label>
+            <input id="company" value="MEDISTYK BUSINESS PRIVATE LIMITED" />
+          </div>
+          <div>
+            <label>Business Unit</label>
+            <input id="bu" value="MEDISTYK PHARMACY" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Employee Name</label>
+            <input id="empName" value="Mr./Mrs/Ms. " />
+          </div>
+          <div>
+            <label>Grade / Level</label>
+            <input id="grade" value="SP-1.0" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Work Location</label>
+            <input id="location" value="Bengaluru, Karnataka" />
+            <div class="help">For HRA exemption, Bengaluru is treated as <span class="pill">Non‑Metro (40% rule)</span></div>
+          </div>
+          <div>
+            <label>Annexure Effective Date</label>
+            <input id="effDate" type="date" />
+          </div>
+        </div>
+
+        <h3>CTC & Variables</h3>
+        <div class="row-3">
+          <div>
+            <label>Total CTC (₹/year)</label>
+            <input id="ctc" type="number" min="0" step="100" value="600000" />
+          </div>
+          <div>
+            <label>Variable Pay (% of CTC)</label>
+            <input id="varPct" type="number" min="0" max="100" step="0.25" value="10" />
+            <div class="help">Variable amount = CTC × %; Fixed CTC = CTC − Variable</div>
+          </div>
+          <div>
+            <label>Pay Frequency</label>
+            <select id="payFreq">
+              <option value="12" selected>Monthly (12)</option>
+              <option value="26">Fortnightly (26)</option>
+            </select>
+          </div>
+        </div>
+
+        <h3>Breakup Rules (editable)</h3>
+        <div class="row-4">
+          <div>
+            <label>Basic as % of <b>Fixed CTC</b></label>
+            <input id="basicPct" type="number" min="1" max="80" step="0.5" value="50" />
+          </div>
+          <div>
+            <label>DA as % of <b>Basic</b></label>
+            <input id="daPct" type="number" min="0" max="100" step="0.5" value="10" />
+          </div>
+          <div>
+            <label>HRA as % of <b>Basic</b></label>
+            <input id="hraPct" type="number" min="0" max="100" step="0.5" value="40" />
+            <div class="help">Non‑metro default. (Metro cities use 50%.)</div>
+          </div>
+          <div>
+            <label>Medical Insurance (₹/year)</label>
+            <input id="medInsurance" type="number" min="0" step="100" value="4500" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label><input id="gratuityOn" type="checkbox" checked /> Include Gratuity Provision</label>
+            <div class="help">Computed as <b>15/26 × (Basic + DA) monthly</b> per year ≈ 4.81% of (Basic + DA).</div>
+          </div>
+          <div class="row">
+            <label><input id="pfOn" type="checkbox" /> Include Employer PF (12% of Basic+DA)</label>
+            <div class="help">Choose base and cap below.</div>
+          </div>
+        </div>
+        <div class="row-3" id="pfBlock" style="display:none">
+          <div>
+            <label>PF Base</label>
+            <select id="pfBase">
+              <option value="actual">Actual Basic + DA</option>
+              <option value="cap">Capped Base ₹15,000 / month</option>
+            </select>
+          </div>
+          <div>
+            <label>Employer PF %</label>
+            <input id="pfPct" type="number" value="12" min="0" max="12" step="0.1" />
+          </div>
+          <div>
+            <label>Employee PF % (for info)</label>
+            <input id="pfEmpPct" type="number" value="12" min="0" max="12" step="0.1" />
+          </div>
+        </div>
+
+        <h3>Other Fixed Additions (optional)</h3>
+        <div id="otherFixed"></div>
+        <div class="btns">
+          <button id="addFixed">➕ Add Fixed Item</button>
+          <button id="clearFixed" class="ghost">🗑️ Clear</button>
+        </div>
+
+        <div class="hr"></div>
+        <div class="tiny">Notes: Ensure <b>Basic + DA</b> is at least the applicable <b>Karnataka Minimum Wages</b> for your scheduled employment & zone. This tool does not fetch wage slabs automatically.</div>
+      </section>
+
+      <!-- Right column: Output -->
+      <section class="card">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px">
+          <div>
+            <h2>Preview — Salary Annexure</h2>
+            <div class="kicker">Auto‑recalculates as you type. Amounts are editable in the table if you want to override.</div>
+          </div>
+          <div class="pill">Bengaluru treated as <b>Non‑Metro</b> for HRA</div>
+        </div>
+
+        <table id="annexure">
+          <thead>
+            <tr>
+              <th style="width:44%">Compensation Component</th>
+              <th class="num">Monthly (₹)</th>
+              <th class="num">Annual (₹)</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+
+        <div class="summary">
+          <div class="chip">
+            <h4 id="fixedTotal">₹0</h4>
+            <p>Fixed CTC (annual)</p>
+          </div>
+          <div class="chip">
+            <h4 id="variableTotal">₹0</h4>
+            <p>Variable CTC (annual)</p>
+          </div>
+          <div class="chip">
+            <h4 id="ctcTotal">₹0</h4>
+            <p>Total CTC (annual)</p>
+          </div>
+        </div>
+
+        <div class="note">
+          <span class="warning">⚠️ For compliance:</span> HRA is normally <b>40%</b> of Basic for non‑metros (Bengaluru) & <b>50%</b> for the 4 metros; Gratuity is payable at <b>15/26 of monthly wages</b> per completed year (we provision ~4.81% of Basic+DA); EPF employer share typically <b>12%</b> of Basic+DA (optionally capped at ₹15,000 base). Use the <b>Advanced</b> toggles on the left to include/exclude.
+        </div>
+
+        <div class="btns" style="margin-top:14px">
+          <button id="exportJson" class="ghost">⬇️ Export JSON</button>
+          <input type="file" id="importJson" accept="application/json" style="display:none" />
+          <button id="importBtn" class="ghost">⬆️ Import JSON</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    Built for Karnataka payroll drafting. This page stores data only in your browser.
+  </footer>
+
+  <script>
+    const fmtINR = (n) => new Intl.NumberFormat('en-IN', { style:'currency', currency:'INR', maximumFractionDigits:0 }).format(Math.round(n||0));
+    const toNum = (el) => Number((el.value||'0').toString().replace(/,/g,'')) || 0;
+
+    const el = (id) => document.getElementById(id);
+    const rowsBody = el('rows');
+
+    const state = {
+      items: [
+        { key:'basic', name:'Basic', kind:'fixed', editable:false, monthly:0, annual:0 },
+        { key:'hra', name:'HRA', kind:'fixed', editable:false, monthly:0, annual:0 },
+        { key:'da', name:'DA', kind:'fixed', editable:false, monthly:0, annual:0 },
+        { key:'special', name:'Special Allowance', kind:'fixed', editable:false, monthly:0, annual:0 },
+        { key:'gratuity', name:'Gratuity provision (15/26 of monthly (Basic+DA) per year)', kind:'fixed', editable:false, monthly:0, annual:0 },
+        { key:'med', name:'Medical Insurance (employer)', kind:'fixed', editable:true, monthly:0, annual:0 },
+        { key:'pf', name:'Employer PF', kind:'fixed', editable:false, monthly:0, annual:0 },
+        { key:'varpay', name:'Variable Pay (Performance/Completion)', kind:'variable', editable:false, monthly:0, annual:0 },
+      ],
+      otherFixed: [],
+    };
+
+    function render(){
+      rowsBody.innerHTML = '';
+      const payPeriods = Number(el('payFreq').value);
+
+      const ctc = toNum(el('ctc'));
+      const varPct = toNum(el('varPct'))/100;
+      const basicPct = toNum(el('basicPct'))/100;
+      const daPct = toNum(el('daPct'))/100;
+      const hraPct = toNum(el('hraPct'))/100;
+      const medAnnual = toNum(el('medInsurance'));
+      const includeGratuity = el('gratuityOn').checked;
+      const includePF = el('pfOn').checked;
+      const pfBaseMode = el('pfBase').value;
+      const pfPct = toNum(el('pfPct'))/100;
+
+      // Split fixed/variable from CTC
+      const variableCTC = Math.max(0, ctc * varPct);
+      const fixedCTC = Math.max(0, ctc - variableCTC);
+
+      // Primary structure
+      const basicAnnual = fixedCTC * basicPct; // % of fixed CTC
+      const daAnnual = basicAnnual * daPct;    // % of Basic
+      const hraAnnual = basicAnnual * hraPct;  // % of Basic (non-metro default: 40%)
+
+      let gratuityAnnual = 0;
+      if(includeGratuity){
+        // 15/26 of (Basic + DA) monthly for each completed year ⇒ annual provision approx (Basic+DA) * 15/26 / payPeriods
+        const monthlyBasicDA = (basicAnnual + daAnnual) / 12; // assume monthly wage base
+        gratuityAnnual = monthlyBasicDA * (15/26); // per year provision
+      }
+
+      let pfAnnual = 0;
+      if(includePF){
+        const monthlyBase = (basicAnnual + daAnnual) / 12;
+        const eligibleBase = pfBaseMode === 'cap' ? Math.min(15000, monthlyBase) : monthlyBase;
+        pfAnnual = eligibleBase * pfPct * 12;
+      }
+
+      // Other fixed additions
+      const otherFixedAnnual = state.otherFixed.reduce((s, it)=> s + (Number(it.annual)||0), 0);
+
+      // Special allowance is balancing figure inside fixed CTC after deducting confirmed fixed components
+      let specialAnnual = fixedCTC - (basicAnnual + daAnnual + hraAnnual + gratuityAnnual + pfAnnual + medAnnual + otherFixedAnnual);
+      if(specialAnnual < 0){ specialAnnual = 0; }
+
+      // Variable amount (entirely variable line)
+      const varAnnual = variableCTC;
+
+      // Push values into state items
+      const map = {
+        basic: basicAnnual,
+        hra: hraAnnual,
+        da: daAnnual,
+        special: specialAnnual,
+        gratuity: gratuityAnnual,
+        med: medAnnual,
+        pf: pfAnnual,
+        varpay: varAnnual,
+      };
+
+      // Build rows
+      const ordered = [...state.items.filter(i => i.key !== 'varpay'), ...state.otherFixed, state.items.find(i=>i.key==='varpay')];
+
+      ordered.forEach(it => {
+        const annual = it.key in map ? map[it.key] : (Number(it.annual)||0);
+        const monthly = annual / 12;
+        it.annual = annual; it.monthly = monthly;
+
+        const tr = document.createElement('tr');
+        const name = document.createElement('td'); name.textContent = it.name; tr.appendChild(name);
+
+        const tdM = document.createElement('td'); tdM.className='num';
+        const tdA = document.createElement('td'); tdA.className='num';
+
+        const mInput = document.createElement('input'); mInput.type='number'; mInput.step='1'; mInput.value = Math.round(monthly);
+        const aInput = document.createElement('input'); aInput.type='number'; aInput.step='1'; aInput.value = Math.round(annual);
+        
+        // Make editable only for "other fixed" and Medical Insurance. Primary components are formula‑driven but can be overridden.
+        const canEdit = (['med'].includes(it.key) || it.custom === true);
+        mInput.disabled = !canEdit; aInput.disabled = !canEdit;
+
+        // Two-way: if user edits annual on a custom row, update state
+        aInput.addEventListener('input', () => {
+          if(canEdit){ it.annual = Number(aInput.value)||0; it.monthly = it.annual/12; render(); }
+        });
+        mInput.addEventListener('input', () => {
+          if(canEdit){ it.monthly = Number(mInput.value)||0; it.annual = it.monthly*12; render(); }
+        });
+
+        tdM.appendChild(mInput); tdA.appendChild(aInput);
+        tr.appendChild(tdM); tr.appendChild(tdA);
+
+        const type = document.createElement('td');
+        const span = document.createElement('span');
+        span.className = 'badge ' + (it.kind === 'variable' ? 'variable' : 'fixed');
+        span.textContent = it.kind === 'variable' ? 'Variable' : 'Fixed';
+        type.appendChild(span); tr.appendChild(type);
+        rowsBody.appendChild(tr);
+      });
+
+      // Totals
+      const fixedTotal = basicAnnual + daAnnual + hraAnnual + gratuityAnnual + pfAnnual + medAnnual + otherFixedAnnual + specialAnnual;
+      const variableTotal = varAnnual;
+      el('fixedTotal').textContent = fmtINR(fixedTotal);
+      el('variableTotal').textContent = fmtINR(variableTotal);
+      el('ctcTotal').textContent = fmtINR(fixedTotal + variableTotal);
+
+      // Show/hide PF block
+      el('pfBlock').style.display = includePF ? 'grid' : 'none';
+
+      // Persist lightweight snapshot in memory
+      window.__annexure = { ctc, variableCTC, fixedCTC, basicAnnual, daAnnual, hraAnnual, gratuityAnnual, pfAnnual, specialAnnual, medAnnual, otherFixedAnnual, varAnnual, payPeriods };
+    }
+
+    function addFixedRow(){
+      const id = 'custom_' + Math.random().toString(36).slice(2,7);
+      const obj = { key:id, name:'Other fixed benefit', kind:'fixed', editable:true, custom:true, monthly:0, annual:0 };
+      state.otherFixed.push(obj);
+      buildOtherFixedEditor();
+      render();
+    }
+
+    function clearFixed(){ state.otherFixed = []; buildOtherFixedEditor(); render(); }
+
+    function buildOtherFixedEditor(){
+      const wrap = document.getElementById('otherFixed');
+      wrap.innerHTML = '';
+      state.otherFixed.forEach((it, idx) => {
+        const row = document.createElement('div'); row.className='row'; row.style.marginBottom='8px';
+        const a = document.createElement('div'); a.innerHTML = `<label>Name</label><input value="${it.name}" />`;
+        const b = document.createElement('div'); b.innerHTML = `<label>Annual (₹)</label><input type="number" value="${Math.round(it.annual||0)}" />`;
+        a.querySelector('input').addEventListener('input', e=>{ it.name = e.target.value; render(); });
+        b.querySelector('input').addEventListener('input', e=>{ it.annual = Number(e.target.value)||0; render(); });
+        row.appendChild(a); row.appendChild(b);
+        const del = document.createElement('div'); del.innerHTML = `<label>&nbsp;</label><button class="alt">🗑️ Remove</button>`; del.querySelector('button').addEventListener('click', ()=>{ state.otherFixed.splice(idx,1); buildOtherFixedEditor(); render(); });
+        row.appendChild(del);
+        wrap.appendChild(row);
+      });
+      if(state.otherFixed.length===0){
+        const hint = document.createElement('div');
+        hint.className = 'tiny';
+        hint.style.marginTop = '6px';
+        hint.textContent = 'Examples: LTA, meal cards, telephone reimbursement, gift benefits, etc.';
+        wrap.appendChild(hint);
+      }
+    }
+
+    // Event wiring
+    ['company','bu','empName','grade','location','effDate','ctc','varPct','payFreq','basicPct','daPct','hraPct','medInsurance','pfPct','pfEmpPct','pfBase']
+      .forEach(id=> el(id).addEventListener('input', render));
+    el('gratuityOn').addEventListener('change', render);
+    el('pfOn').addEventListener('change', render);
+
+    el('addFixed').addEventListener('click', (e)=>{e.preventDefault(); addFixedRow();});
+    el('clearFixed').addEventListener('click', (e)=>{e.preventDefault(); clearFixed();});
+
+    el('printBtn').addEventListener('click', ()=> window.print());
+    el('resetBtn').addEventListener('click', ()=>{ localStorage.removeItem('annexure_v1'); location.reload(); });
+
+    el('saveBtn').addEventListener('click', ()=>{
+      const data = {
+        form: ['company','bu','empName','grade','location','effDate','ctc','varPct','payFreq','basicPct','daPct','hraPct','medInsurance'].reduce((o,id)=>{o[id]=el(id).value; return o;},{}),
+        flags: { gratuityOn: el('gratuityOn').checked, pfOn: el('pfOn').checked, pfPct: el('pfPct').value, pfEmpPct: el('pfEmpPct').value, pfBase: el('pfBase').value },
+        otherFixed: state.otherFixed,
+      };
+      localStorage.setItem('annexure_v1', JSON.stringify(data));
+      alert('Saved to your browser.');
+    });
+
+    el('loadBtn').addEventListener('click', ()=>{
+      const str = localStorage.getItem('annexure_v1');
+      if(!str){ alert('No saved data found.'); return; }
+      try{ const data = JSON.parse(str); hydrate(data); render(); } catch(err){ alert('Failed to load.'); }
+    });
+
+    function hydrate(data){
+      if(!data) return;
+      Object.entries(data.form||{}).forEach(([k,v])=>{ if(el(k)) el(k).value = v; });
+      if(data.flags){ el('gratuityOn').checked = !!data.flags.gratuityOn; el('pfOn').checked = !!data.flags.pfOn; el('pfPct').value = data.flags.pfPct||'12'; el('pfEmpPct').value = data.flags.pfEmpPct||'12'; el('pfBase').value = data.flags.pfBase||'actual'; }
+      state.otherFixed = Array.isArray(data.otherFixed)? data.otherFixed : [];
+      buildOtherFixedEditor();
+    }
+
+    // JSON in/out
+    el('exportJson').addEventListener('click', ()=>{
+      const data = {
+        meta:{ tool:'Karnataka Annexure Builder', version:1 },
+        values:{
+          company: el('company').value, bu: el('bu').value, empName: el('empName').value, grade: el('grade').value, location: el('location').value, effDate: el('effDate').value,
+          ctc: toNum(el('ctc')), varPct: toNum(el('varPct')), payFreq: Number(el('payFreq').value), basicPct: toNum(el('basicPct')), daPct: toNum(el('daPct')), hraPct: toNum(el('hraPct')), medInsurance: toNum(el('medInsurance')),
+          gratuityOn: el('gratuityOn').checked, pfOn: el('pfOn').checked, pfPct: toNum(el('pfPct')), pfEmpPct: toNum(el('pfEmpPct')), pfBase: el('pfBase').value,
+          otherFixed: state.otherFixed,
+          calc: window.__annexure || {}
+        }
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download='salary-annexure.json'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    el('importBtn').addEventListener('click', ()=> el('importJson').click());
+    el('importJson').addEventListener('change', (e)=>{
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader(); reader.onload = (ev)=>{ try{ const data = JSON.parse(ev.target.result); hydrate({ form: data.values, flags:{ gratuityOn:data.values.gratuityOn, pfOn:data.values.pfOn, pfPct:data.values.pfPct, pfEmpPct:data.values.pfEmpPct, pfBase:data.values.pfBase }, otherFixed:data.values.otherFixed }); render(); } catch{ alert('Invalid JSON'); } };
+      reader.readAsText(file);
+    });
+
+    // Boot
+    buildOtherFixedEditor();
+    render();
+  </script>
+</body>
+</html>
